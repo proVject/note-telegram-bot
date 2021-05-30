@@ -38,7 +38,11 @@ const start = async () => {
 
     try {
       if (text === "/start") {
-        await UserModel.create({ chatId });
+        let user = await UserModel.findOne({ chatId });
+        if (!user) {
+          await UserModel.create({ chatId });
+        }
+
         await bot.sendSticker(
           chatId,
           "https://cdn.tlgrm.ru/stickers/ff6/4b6/ff64b611-aa7c-3603-b73c-7cd86d4b71dc/192/6.webp"

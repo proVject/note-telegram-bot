@@ -1,6 +1,7 @@
 const TelegramApi = require("node-telegram-bot-api");
 const { againtOptions, gameOptions } = require("./options");
-
+const sequelize = require("./db.js");
+const UserModel = require("./models");
 const token = "1017300068:AAF1uMlYTI_9OHw2JmM7e6aDQ1OOn1n6rl8";
 
 const bot = new TelegramApi(token, { polling: true });
@@ -23,27 +24,42 @@ const startGame = async (chatId) => {
   await bot.sendMessage(chatId, "Type your guess!", gameOptions);
 };
 
-const start = () => {
+const start = async () => {
+  try {
+    await sequelize.authenticate();
+    await sequelize.sync();
+  } catch (error) {
+    console.log(error);
+  }
+
   bot.on("message", async (msg) => {
     const text = msg.text;
     const chatId = msg.chat.id;
-    if (text === "/start") {
-      await bot.sendSticker(
-        chatId,
-        "https://cdn.tlgrm.ru/stickers/ff6/4b6/ff64b611-aa7c-3603-b73c-7cd86d4b71dc/192/6.webp"
-      );
-      return bot.sendMessage(chatId, "Hello friend!");
+
+    try {
+      if (text === "/start") {
+        await UserModel.create({ chatId });
+        await bot.sendSticker(
+          chatId,
+          "https://cdn.tlgrm.ru/stickers/ff6/4b6/ff64b611-aa7c-3603-b73c-7cd86d4b71dc/192/6.webp"
+        );
+        return bot.sendMessage(chatId, "Hello friend!");
+      }
+      if (text === "/info") {
+        const user = await UserModel.findOne({ chatId });
+        return bot.sendMessage(
+          chatId,
+          `your name is ${msg.from.first_name} ${msg.from.last_name}. Your Results: right - ${user.right}, wrong - ${user.wrong}`
+        );
+      }
+      if (text === "/game") {
+        return startGame(chatId);
+      }
+      return bot.sendMessage(chatId, "sorry, bro. I didn't understand you!");
+    } catch (error) {
+      console.log(error);
+      return bot.sendMessage(chatId, "something went wrong!");
     }
-    if (text === "/info") {
-      return bot.sendMessage(
-        chatId,
-        `your name is ${msg.from.first_name} ${msg.from.last_name}`
-      );
-    }
-    if (text === "/game") {
-      return startGame(chatId);
-    }
-    return bot.sendMessage(chatId, "sorry, bro. I didn't understand you!");
   });
   bot.on("callback_query", async (msg) => {
     const chatId = msg.message.chat.id;
@@ -51,15 +67,20 @@ const start = () => {
     if (data === "/again") {
       return startGame(chatId);
     }
+    const user = await UserModel.findOne({ chatId });
+    console.log(user);
     if (+data === chats[chatId]) {
-      return bot.sendMessage(chatId, "success!", againtOptions);
+      user.right++;
+      await bot.sendMessage(chatId, "success!", againtOptions);
     } else {
-      return bot.sendMessage(
+      user.wrong++;
+      await bot.sendMessage(
         chatId,
         `wrong! it was ${chats[chatId]}`,
         againtOptions
       );
     }
+    await user.save();
   });
 };
 

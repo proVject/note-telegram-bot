@@ -1,12 +1,21 @@
+require('dotenv').config()
 const { Sequelize } = require("sequelize");
 
+const configs = {
+  database: process.env.PG_DATABASE,
+  username: process.env.PG_USERNAME,
+  password: process.env.PG_PASSWORD,
+  host: process.env.PG_HOST,
+  port: process.env.PG_PORT,
+}
+
 module.exports = new Sequelize(
-  "d5mfq7pil5h12k",
-  "wiheoraqjmgpeh",
-  "4abe0e12b9df505460264bacbda449a78e199e22e230c5618fa4b1ca179b9761",
+  configs.database,
+  configs.username,
+  configs.password,
   {
     connectionString:
-      "postgres://wiheoraqjmgpeh:4abe0e12b9df505460264bacbda449a78e199e22e230c5618fa4b1ca179b9761@ec2-3-233-7-12.compute-1.amazonaws.com:5432/d5mfq7pil5h12k",
+      `postgres://${configs.username}:${configs.password}@${configs.host}:${configs.port}/${configs.database}`,
     protocol: "postgres",
     dialectOptions: {
       ssl: {
@@ -14,8 +23,8 @@ module.exports = new Sequelize(
         rejectUnauthorized: false,
       },
     },
-    host: "ec2-3-233-7-12.compute-1.amazonaws.com",
-    port: "5432",
+    host: configs.host,
+    port: configs.port,
     dialect: "postgres",
   }
 );

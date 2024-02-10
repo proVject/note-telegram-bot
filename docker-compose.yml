@@ -1,0 +1,26 @@
+version: '3.7'
+
+services:
+  vovazb_tg_db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_DB: ${PG_DATABASE}
+      POSTGRES_USER: ${PG_USERNAME}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+    ports:
+      - "${PG_PORT}:5432"
+    volumes:
+      - vovazb_tg_postgresql_db:/var/lib/postgresql/data
+
+  vovazb_tg_pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    ports:
+      - "7676:8080"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+
+volumes:
+  vovazb_tg_postgresql_db:

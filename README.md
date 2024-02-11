@@ -1,7 +1,7 @@
 # bot link
 [vovaZBbot (example)](https://t.me/VovaZBtestBot)
 
-## using
+## usage
 
 1. create .env file in the root folder with variables
     - TG_TOKEN - generate with [BotFather](https://t.me/BotFather)

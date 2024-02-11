@@ -18,10 +18,7 @@ module.exports = new Sequelize(
       `postgres://${configs.username}:${configs.password}@${configs.host}:${configs.port}/${configs.database}`,
     protocol: "postgres",
     dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false,
-      },
+      ssl: false
     },
     host: configs.host,
     port: configs.port,
